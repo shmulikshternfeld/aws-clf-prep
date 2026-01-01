@@ -32,6 +32,7 @@ export default function ActiveExam() {
     const [flagged, setFlagged] = useState<Record<string, boolean>>({});
     const [timeLeft, setTimeLeft] = useState((examConfig as any)?.timeLimitMinutes ? (examConfig as any).timeLimitMinutes * 60 : 90 * 60);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [hasAddedTime, setHasAddedTime] = useState(false);
 
     // Shuffled Options Map: Record<questionId, number[]> -> maps DisplayIndex to OriginalIndex
     const [shuffledOptions, setShuffledOptions] = useState<Record<string, number[]>>({});
@@ -66,6 +67,13 @@ export default function ActiveExam() {
         return () => clearInterval(timer);
     }, []);
 
+    const handleAddTime = () => {
+        if (!hasAddedTime) {
+            setTimeLeft(prev => prev + 1800); // Add 30 minutes
+            setHasAddedTime(true);
+        }
+    };
+
     const handleSubmit = useCallback(() => {
         // Generate Result ID (random for now)
         const attemptId = Date.now().toString();
@@ -79,12 +87,15 @@ export default function ActiveExam() {
             shuffledOptions // Save shuffle state if we want to show exact view user saw (optional)
         };
 
-        // Calculate Score
+        // Calculate Score (AWS Style: 100-1000)
         let correctCount = 0;
         examQuestions.forEach(q => {
             if (answers[q.id] === q.correctAnswer) correctCount++;
         });
-        const finalScore = Math.round((correctCount / examQuestions.length) * 1000);
+
+        // Formula: Scaled Score = 100 + (Correct / Total) * 900
+        // Min Score = 100 (0 correct), Max Score = 1000 (all correct)
+        const finalScore = Math.round(100 + (correctCount / examQuestions.length) * 900);
 
         const resultsPayload = { ...result, score: finalScore, passed: finalScore >= 700 };
         localStorage.setItem(`result-${attemptId}`, JSON.stringify(resultsPayload));
@@ -133,9 +144,21 @@ export default function ActiveExam() {
                     <span className="bg-gray-100 px-2 py-1 rounded text-xs">שאלה {currentIndex + 1} מתוך {examQuestions.length}</span>
                 </div>
 
-                <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 font-mono text-xl font-bold text-aws-dark">
-                    <Clock size={20} className={timeLeft < 300 ? "text-red-500 animate-pulse" : "text-gray-400"} />
-                    <span className={timeLeft < 300 ? "text-red-600" : ""}>{formatTime(timeLeft)}</span>
+                <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-4">
+                    <div className="flex items-center gap-2 font-mono text-xl font-bold text-aws-dark">
+                        <Clock size={20} className={timeLeft < 300 ? "text-red-500 animate-pulse" : "text-gray-400"} />
+                        <span className={timeLeft < 300 ? "text-red-600" : ""}>{formatTime(timeLeft)}</span>
+                    </div>
+
+                    {!hasAddedTime && (
+                        <button
+                            onClick={handleAddTime}
+                            className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100 transition-colors"
+                            title="תוספת זמן (ESL +30 דקות)"
+                        >
+                            +30 דק' (ESL)
+                        </button>
+                    )}
                 </div>
 
                 <button

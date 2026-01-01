@@ -89,6 +89,16 @@ export default function ActiveExam() {
         const resultsPayload = { ...result, score: finalScore, passed: finalScore >= 700 };
         localStorage.setItem(`result-${attemptId}`, JSON.stringify(resultsPayload));
 
+        // Save to History (Append to list)
+        try {
+            const historyStr = localStorage.getItem('aws-clf-history');
+            const history = historyStr ? JSON.parse(historyStr) : [];
+            const newHistory = [resultsPayload, ...history];
+            localStorage.setItem('aws-clf-history', JSON.stringify(newHistory));
+        } catch (e) {
+            console.error("Failed to save history", e);
+        }
+
         navigate(`/results/${attemptId}`);
     }, [answers, examId, examQuestions, navigate]);
 

@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Play, TrendingUp, BookOpen, Quote } from 'lucide-react';
+import { useExamHistory } from '../hooks/useExamHistory';
 
 export default function HomePage() {
+    const { stats } = useExamHistory();
+
     return (
         <div className="space-y-10 pb-12">
             {/* Hero Section */}
@@ -22,19 +25,19 @@ export default function HomePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <StatCard
                     label="סימולציות שהושלמו"
-                    value="0/20"
+                    value={`${stats.completed}`}
                     icon={TrendingUp}
                     color="text-aws-blue bg-blue-50"
                 />
                 <StatCard
                     label="ציון ממוצע"
-                    value="-"
+                    value={`${stats.averageScore}`}
                     icon={AwardWrapper}
                     color="text-emerald-600 bg-emerald-50"
                 />
                 <StatCard
                     label="התקדמות בחומר הלימוד"
-                    value="0%"
+                    value="-" // We don't track learning view progress yet
                     icon={BookOpen}
                     color="text-purple-600 bg-purple-50"
                 />

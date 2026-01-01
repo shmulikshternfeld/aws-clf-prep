@@ -40,7 +40,7 @@ function getRandomSubset(sourceArray: any[], count: number, rng: () => number) {
     // If we request more than available, just return all available (or duplicate if we wanted to be strict, but for now unique is better)
     // To handle smaller pools than requested, we take what we have.
     const available = [...sourceArray];
-    const result: string[] = [];
+
 
     // Fisher-Yates shuffle
     for (let i = available.length - 1; i > 0; i--) {

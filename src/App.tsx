@@ -8,7 +8,7 @@ import ResultsPage from './pages/ResultsPage';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div dir="rtl" className="min-h-screen bg-slate-50 font-sans text-slate-900">
         <Routes>
           <Route path="/" element={<Layout />}>

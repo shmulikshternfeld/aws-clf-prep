@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-aws-dark: #232f3e;
+  --color-aws-light: #ff9900;
+  --color-aws-hover: #ec7211;
+  --color-aws-blue: #007eb9;
+}
+
+@layer base {
+  body {
+    /* Using styles directly instead of @apply to avoid potential utility issues if theme isn't loaded yet */
+    background-color: var(--color-slate-50);
+    color: var(--color-slate-900);
+  }
+}

@@ -1,15 +1,20 @@
-import { useState } from 'react';
-import { learningDomains, refresherResources, type LearningDomain } from '../data/learning-modules';
+import { useState, type ReactNode } from 'react';
+import { learningDomains, refresherResources, type LearningDomain, type ContentBlock } from '../data/learning-modules';
 import {
-    Cloud, ShieldCheck, Server, CreditCard,
-    BookOpen, Zap, ChevronRight, X, Sparkles, GraduationCap
+    Cloud, ShieldCheck, Server, CreditCard, Activity, Share2, Brain, Terminal,
+    BookOpen, Zap, ChevronRight, X, Sparkles, GraduationCap,
+    CheckCircle2, XCircle, HelpCircle, AlertTriangle, Info, Lightbulb
 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
     'Cloud': Cloud,
     'ShieldCheck': ShieldCheck,
     'Server': Server,
-    'CreditCard': CreditCard
+    'CreditCard': CreditCard,
+    'Activity': Activity,
+    'Share2': Share2,
+    'Brain': Brain,
+    'Terminal': Terminal
 };
 
 export default function StudyCenter() {
@@ -26,7 +31,7 @@ export default function StudyCenter() {
                         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">AWS אקדמיית ה-Cloud</h1>
                     </div>
                     <p className="text-gray-600 max-w-xl text-lg">
-                        המרכז המקיף ללמידה ותרגול. בחרו בין העמקה במודולים הלימודיים לבין חזרה מהירה לפני מבחן.
+                        המרכז המקיף ללמידה ותרגול (כולל AI ו-Analytics). בחרו בין העמקה במודולים הלימודיים לבין חזרה מהירה.
                     </p>
                 </div>
 
@@ -35,8 +40,8 @@ export default function StudyCenter() {
                     <button
                         onClick={() => setActiveTab('learning')}
                         className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'learning'
-                                ? 'bg-white text-aws-dark shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white text-aws-dark shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         <BookOpen size={18} />
@@ -45,8 +50,8 @@ export default function StudyCenter() {
                     <button
                         onClick={() => setActiveTab('refresher')}
                         className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'refresher'
-                                ? 'bg-white text-aws-dark shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'bg-white text-aws-dark shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         <Zap size={18} />
@@ -63,7 +68,7 @@ export default function StudyCenter() {
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {learningDomains.map((domain) => {
-                            const Icon = iconMap[domain.icon];
+                            const Icon = iconMap[domain.icon] || Cloud;
                             return (
                                 <button
                                     key={domain.id}
@@ -99,10 +104,10 @@ export default function StudyCenter() {
                         className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in fade-in zoom-in-95 duration-200"
                         onClick={e => e.stopPropagation()}
                     >
-                        <div className="sticky top-0 bg-gray-50 px-8 py-5 border-b border-gray-100 flex justify-between items-center">
+                        <div className="sticky top-0 bg-gray-50 px-8 py-5 border-b border-gray-100 flex justify-between items-center z-20">
                             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
                                 {(() => {
-                                    const Icon = iconMap[selectedDomain.icon];
+                                    const Icon = iconMap[selectedDomain.icon] || Cloud;
                                     return <Icon className="text-aws-blue" />;
                                 })()}
                                 {selectedDomain.title}
@@ -123,9 +128,19 @@ export default function StudyCenter() {
                                     <p className="text-lg text-gray-600 mb-6 border-b border-gray-100 pb-4">{module.summary}</p>
 
                                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                        <div className="lg:col-span-2 prose prose-slate max-w-none text-gray-700 leading-loose" dangerouslySetInnerHTML={{ __html: module.content }}></div>
+                                        <div className="lg:col-span-2 space-y-8">
+                                            {/* Legacy Content Support */}
+                                            {module.content && (
+                                                <div className="prose prose-slate max-w-none text-gray-700 leading-loose" dangerouslySetInnerHTML={{ __html: module.content }}></div>
+                                            )}
 
-                                        <div className="bg-blue-50 p-6 rounded-xl h-fit border border-blue-100">
+                                            {/* New Blocks Support */}
+                                            {module.blocks?.map((block, idx) => (
+                                                <BlockRenderer key={idx} block={block} />
+                                            ))}
+                                        </div>
+
+                                        <div className="bg-blue-50 p-6 rounded-xl h-fit border border-blue-100 sticky top-24">
                                             <h4 className="font-bold text-blue-900 mb-4 flex items-center gap-2">
                                                 <Zap size={18} className="text-blue-600 fill-current" />
                                                 נקודות מפתח
@@ -144,7 +159,7 @@ export default function StudyCenter() {
                             ))}
                         </div>
 
-                        <div className="sticky bottom-0 bg-white p-4 border-t border-gray-100 text-center">
+                        <div className="sticky bottom-0 bg-white p-4 border-t border-gray-100 text-center z-20">
                             <button
                                 onClick={() => setSelectedDomain(null)}
                                 className="px-8 py-2 bg-gray-900 text-white rounded-lg font-bold hover:bg-black transition-colors"
@@ -155,6 +170,108 @@ export default function StudyCenter() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+// --- Helper Components ---
+
+function BlockRenderer({ block }: { block: ContentBlock }) {
+    switch (block.type) {
+        case 'html':
+            return <div className="prose prose-slate max-w-none text-gray-700 leading-loose" dangerouslySetInnerHTML={{ __html: block.content }} />;
+        case 'alert':
+            return <AlertBlock title={block.title} content={block.content} style={block.style} />;
+        case 'quiz':
+            return <QuizBlock question={block.question} options={block.options} correctIndex={block.correctIndex} explanation={block.explanation} />;
+        default:
+            return null;
+    }
+}
+
+function AlertBlock({ title, content, style }: { title: string, content: string, style: 'info' | 'warning' | 'tip' }) {
+    const styles = {
+        info: 'bg-blue-50 border-blue-200 text-blue-800',
+        warning: 'bg-orange-50 border-orange-200 text-orange-800',
+        tip: 'bg-green-50 border-green-200 text-green-800'
+    };
+    const icons = {
+        info: Info,
+        warning: AlertTriangle,
+        tip: Lightbulb
+    };
+    const Icon = icons[style];
+
+    return (
+        <div className={`p-4 rounded-lg border-l-4 border shadow-sm ${styles[style]} flex gap-3`}>
+            <Icon className="shrink-0 mt-0.5" size={20} />
+            <div>
+                <strong className="block font-bold mb-1">{title}</strong>
+                <p className="text-sm">{content}</p>
+            </div>
+        </div>
+    );
+}
+
+function QuizBlock({ question, options, correctIndex, explanation }: { question: string, options: string[], correctIndex: number, explanation: string }) {
+    const [selected, setSelected] = useState<number | null>(null);
+    const [showExplanation, setShowExplanation] = useState(false);
+
+    const handleSelect = (idx: number) => {
+        if (selected !== null) return; // Prevent changing answer
+        setSelected(idx);
+        setShowExplanation(true);
+    };
+
+
+
+    return (
+        <div className="my-6 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-gray-50 px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+                <HelpCircle size={18} className="text-aws-blue" />
+                <span className="font-bold text-gray-700 text-sm">בחן את עצמך</span>
+            </div>
+            <div className="p-5">
+                <p className="font-bold text-gray-900 mb-4 text-lg">{question}</p>
+                <div className="space-y-2">
+                    {options.map((option, idx) => {
+                        let btnClass = "w-full text-right p-3 rounded-lg border transition-all text-sm font-medium ";
+                        if (selected === null) {
+                            btnClass += "border-gray-200 hover:border-aws-blue hover:bg-blue-50";
+                        } else {
+                            if (idx === correctIndex) {
+                                btnClass += "border-green-500 bg-green-50 text-green-900";
+                            } else if (idx === selected) {
+                                btnClass += "border-red-300 bg-red-50 text-red-900";
+                            } else {
+                                btnClass += "border-gray-100 text-gray-400 opacity-50";
+                            }
+                        }
+
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => handleSelect(idx)}
+                                disabled={selected !== null}
+                                className={btnClass}
+                            >
+                                <div className="flex justify-between items-center">
+                                    <span>{option}</span>
+                                    {selected !== null && idx === correctIndex && <CheckCircle2 size={18} className="text-green-600" />}
+                                    {selected !== null && idx === selected && idx !== correctIndex && <XCircle size={18} className="text-red-500" />}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {showExplanation && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100 animate-in fade-in slide-in-from-top-2">
+                        <strong className="block text-gray-900 text-sm mb-1">הסבר:</strong>
+                        <p className="text-gray-700 text-sm">{explanation}</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -242,7 +359,14 @@ function RefresherView() {
     );
 }
 
-function RefresherCard({ title, icon: Icon, children, color }: any) {
+interface RefresherCardProps {
+    title: string;
+    icon: any;
+    children: ReactNode;
+    color: string;
+}
+
+function RefresherCard({ title, icon: Icon, children, color }: RefresherCardProps) {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-6">
